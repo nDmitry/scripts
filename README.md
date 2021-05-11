@@ -1,4 +1,4 @@
-Scripts I'm using for my pet-projects where some full-scale monitoring solutions feel like an overkill. All of them are written in Go.
+Scripts I'm using for my pet-projects where some full-scale monitoring or backup solutions feel like an overkill. All of them are written in Go.
 
 ## freespace
 
