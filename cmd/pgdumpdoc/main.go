@@ -58,7 +58,7 @@ func Run(d dumper, n notifier, u uploader) {
 			log.Printf("Could not send an error notification: %v\n", err)
 		}
 
-		log.Fatalf("Could not dump the database: %v\n", err)
+		log.Fatalf("Could not backup the database: %v\n", err)
 	}
 
 	if err = u.Upload(outfile, bucket, object); err != nil {
@@ -68,7 +68,17 @@ func Run(d dumper, n notifier, u uploader) {
 			log.Printf("Could not send an error notification: %v\n", err)
 		}
 
-		log.Fatalf("Could not dump the database: %v\n", err)
+		log.Fatalf("Could not upload the database backup: %v\n", err)
+	}
+
+	if err = os.Remove(outfile); err != nil {
+		if telegramErr := n.Notify(
+			fmt.Sprintf("Could not remove uploaded backup: %v\n", err),
+		); telegramErr != nil {
+			log.Printf("Could not send an error notification: %v\n", err)
+		}
+
+		log.Fatalf("Could not remove uploaded backup: %v\n", err)
 	}
 
 	log.Println("Successfully dumped the database")
