@@ -1,9 +1,9 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
-	"os"
 
 	"github.com/nDmitry/scripts/pkg/diskstat"
 	"github.com/nDmitry/scripts/pkg/integrations"
@@ -18,17 +18,19 @@ const (
 
 const Threshold = 10
 
-var telegramToken = os.Getenv("TELEGRAM_TOKEN")
-var telegramChatID = os.Getenv("TELEGRAM_CHAT_ID")
+var telegramToken = flag.String("telegram-token", "", "Telegram Bot API token")
+var telegramChatID = flag.Int("telegram-chat-id", 0, "ID of a Telegram group to send messages in")
 
 type notifier interface {
 	Notify(text string) error
 }
 
 func main() {
+	flag.Parse()
+
 	Run(&integrations.TelegramNotifier{
-		Token:  telegramToken,
-		ChatID: telegramChatID,
+		Token:  *telegramToken,
+		ChatID: *telegramChatID,
 	})
 }
 

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -8,17 +9,17 @@ import (
 	"github.com/nDmitry/scripts/pkg/integrations"
 )
 
-var container = os.Getenv("CONTAINER")
-var user = os.Getenv("USER")
-var database = os.Getenv("DATABASE")
-var outfile = os.Getenv("OUTFILE")
-var endpoint = os.Getenv("S3_ENDPOINT")
-var accessKeyID = os.Getenv("S3_ACCESS_KEY_ID")
-var accessKeySecret = os.Getenv("S3_ACCESS_KEY_SECRET")
-var bucket = os.Getenv("S3_BUCKET")
-var object = os.Getenv("S3_OBJECT")
-var telegramToken = os.Getenv("TELEGRAM_TOKEN")
-var telegramChatID = os.Getenv("TELEGRAM_CHAT_ID")
+var container = flag.String("container", "", "Docker container name running PostgreSQL database")
+var user = flag.String("u", "", "User to run pg_dump under")
+var database = flag.String("db", "", "Database name")
+var outfile = flag.String("o", "", "Backup file output path, will be deleted in a successful scenario")
+var endpoint = flag.String("s3-endpoint", "", "S3 API endpoint URL")
+var accessKeyID = flag.String("s3-key-id", "", "S3 access key ID")
+var accessKeySecret = flag.String("s3-key-secret", "", "S3 access key secret")
+var bucket = flag.String("s3-bucket", "", "S3 bucket name")
+var object = flag.String("s3-object", "", "S3 object key (path to uploaded file)")
+var telegramToken = flag.String("telegram-token", "", "Telegram Bot API token")
+var telegramChatID = flag.Int("telegram-chat-id", 0, "ID of a Telegram group to send messages in")
 
 type dumper interface {
 	DumpDocker() error
@@ -33,18 +34,20 @@ type notifier interface {
 }
 
 func main() {
+	flag.Parse()
+
 	Run(&integrations.PostgresDumper{
-		Container: container,
-		User:      user,
-		Database:  database,
-		Outfile:   outfile,
+		Container: *container,
+		User:      *user,
+		Database:  *database,
+		Outfile:   *outfile,
 	}, &integrations.TelegramNotifier{
-		Token:  telegramToken,
-		ChatID: telegramChatID,
+		Token:  *telegramToken,
+		ChatID: *telegramChatID,
 	}, &integrations.S3{
-		Endpoint:        endpoint,
-		AccessKeyID:     accessKeyID,
-		AccessKeySecret: accessKeySecret,
+		Endpoint:        *endpoint,
+		AccessKeyID:     *accessKeyID,
+		AccessKeySecret: *accessKeySecret,
 	})
 }
 
@@ -61,7 +64,7 @@ func Run(d dumper, n notifier, u uploader) {
 		log.Fatalf("Could not backup the database: %v\n", err)
 	}
 
-	if err = u.Upload(outfile, bucket, object); err != nil {
+	if err = u.Upload(*outfile, *bucket, *object); err != nil {
 		if telegramErr := n.Notify(
 			fmt.Sprintf("Could not upload the database backup: %v\n", err),
 		); telegramErr != nil {
@@ -71,7 +74,7 @@ func Run(d dumper, n notifier, u uploader) {
 		log.Fatalf("Could not upload the database backup: %v\n", err)
 	}
 
-	if err = os.Remove(outfile); err != nil {
+	if err = os.Remove(*outfile); err != nil {
 		if telegramErr := n.Notify(
 			fmt.Sprintf("Could not remove uploaded backup: %v\n", err),
 		); telegramErr != nil {

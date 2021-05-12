@@ -5,27 +5,20 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strconv"
 )
 
 type TelegramNotifier struct {
 	Token  string
-	ChatID string
+	ChatID int
 }
 
 func (tn *TelegramNotifier) Notify(text string) error {
-	chatID, err := strconv.Atoi(tn.ChatID)
-
-	if err != nil {
-		return err
-	}
-
 	body := struct {
 		ChatID                int    `json:"chat_id"`
 		Text                  string `json:"text"`
 		DisableWebPagePreview bool   `json:"disable_web_page_preview"`
 	}{
-		ChatID:                chatID,
+		ChatID:                tn.ChatID,
 		Text:                  text,
 		DisableWebPagePreview: true,
 	}
