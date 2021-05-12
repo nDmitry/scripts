@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/nDmitry/scripts/pkg/diskstat"
-	"github.com/nDmitry/scripts/pkg/notifier"
+	"github.com/nDmitry/scripts/pkg/integrations"
 )
 
 const (
@@ -17,7 +17,15 @@ const (
 
 const Threshold = 10
 
+type notifier interface {
+	Notify(text string) error
+}
+
 func main() {
+	Run(&integrations.TelegramNotifier{})
+}
+
+func Run(n notifier) {
 	stat, err := diskstat.Get()
 
 	if err != nil {
@@ -39,10 +47,6 @@ func main() {
 		avail,
 		all,
 	)
-
-	n := notifier.NotifierImpl{
-		Notifier: &notifier.TelegramNotifier{},
-	}
 
 	if err = n.Notify(text); err != nil {
 		log.Fatalln("Could not send the message: %w", err)
