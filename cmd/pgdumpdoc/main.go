@@ -12,11 +12,20 @@ var container = os.Getenv("CONTAINER")
 var user = os.Getenv("USER")
 var database = os.Getenv("DATABASE")
 var outfile = os.Getenv("OUTFILE")
+var endpoint = os.Getenv("S3_ENDPOINT")
+var accessKeyID = os.Getenv("S3_ACCESS_KEY_ID")
+var accessKeySecret = os.Getenv("S3_ACCESS_KEY_SECRET")
+var bucket = os.Getenv("S3_BUCKET")
+var object = os.Getenv("S3_OBJECT")
 var telegramToken = os.Getenv("TELEGRAM_TOKEN")
 var telegramChatID = os.Getenv("TELEGRAM_CHAT_ID")
 
 type dumper interface {
 	DumpDocker() error
+}
+
+type uploader interface {
+	Upload(filePath string, bucketName string, objectName string) error
 }
 
 type notifier interface {
@@ -32,15 +41,29 @@ func main() {
 	}, &integrations.TelegramNotifier{
 		Token:  telegramToken,
 		ChatID: telegramChatID,
+	}, &integrations.S3{
+		Endpoint:        endpoint,
+		AccessKeyID:     accessKeyID,
+		AccessKeySecret: accessKeySecret,
 	})
 }
 
-func Run(d dumper, n notifier) {
-	err := d.DumpDocker()
+func Run(d dumper, n notifier, u uploader) {
+	var err error
 
-	if err != nil {
+	if err = d.DumpDocker(); err != nil {
 		if telegramErr := n.Notify(
-			fmt.Sprintf("Could not check the disk space: %v\n", err),
+			fmt.Sprintf("Could not backup the database: %v\n", err),
+		); telegramErr != nil {
+			log.Printf("Could not send an error notification: %v\n", err)
+		}
+
+		log.Fatalf("Could not dump the database: %v\n", err)
+	}
+
+	if err = u.Upload(outfile, bucket, object); err != nil {
+		if telegramErr := n.Notify(
+			fmt.Sprintf("Could not upload the database backup: %v\n", err),
 		); telegramErr != nil {
 			log.Printf("Could not send an error notification: %v\n", err)
 		}
