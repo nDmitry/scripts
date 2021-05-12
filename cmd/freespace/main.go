@@ -29,7 +29,13 @@ func Run(n notifier) {
 	stat, err := diskstat.Get()
 
 	if err != nil {
-		log.Fatalln("Encountered and error while doing a syscall: %w", err)
+		if telegramErr := n.Notify(
+			fmt.Sprintf("Could not check the disk space: %v\n", err),
+		); telegramErr != nil {
+			log.Printf("Could not send an error notification: %v\n", err)
+		}
+
+		log.Fatalf("Encountered and error while doing a syscall: %v\n", err)
 	}
 
 	all := stat.All / float64(GB)
@@ -49,7 +55,7 @@ func Run(n notifier) {
 	)
 
 	if err = n.Notify(text); err != nil {
-		log.Fatalln("Could not send the message: %w", err)
+		log.Fatalf("Could not send the message: %v", err)
 	}
 
 	log.Println("Successfully sent a notification")
