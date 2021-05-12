@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/nDmitry/scripts/pkg/diskstat"
 	"github.com/nDmitry/scripts/pkg/integrations"
@@ -17,12 +18,18 @@ const (
 
 const Threshold = 10
 
+var telegramToken = os.Getenv("TELEGRAM_TOKEN")
+var telegramChatID = os.Getenv("TELEGRAM_CHAT_ID")
+
 type notifier interface {
 	Notify(text string) error
 }
 
 func main() {
-	Run(&integrations.TelegramNotifier{})
+	Run(&integrations.TelegramNotifier{
+		Token:  telegramToken,
+		ChatID: telegramChatID,
+	})
 }
 
 func Run(n notifier) {

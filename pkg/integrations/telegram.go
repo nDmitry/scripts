@@ -5,17 +5,16 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"os"
 	"strconv"
 )
 
-var telegramToken = os.Getenv("TELEGRAM_TOKEN")
-var telegramChatID = os.Getenv("TELEGRAM_CHAT_ID")
-
-type TelegramNotifier struct{}
+type TelegramNotifier struct {
+	Token  string
+	ChatID string
+}
 
 func (tn *TelegramNotifier) Notify(text string) error {
-	chatID, err := strconv.Atoi(telegramChatID)
+	chatID, err := strconv.Atoi(tn.ChatID)
 
 	if err != nil {
 		return err
@@ -38,7 +37,7 @@ func (tn *TelegramNotifier) Notify(text string) error {
 	}
 
 	resp, err := http.Post(
-		fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", telegramToken),
+		fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", tn.Token),
 		"application/json",
 		bytes.NewBuffer(json),
 	)

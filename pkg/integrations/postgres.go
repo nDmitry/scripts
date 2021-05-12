@@ -8,12 +8,12 @@ import (
 	"strings"
 )
 
-var container = os.Getenv("CONTAINER")
-var user = os.Getenv("USER")
-var database = os.Getenv("DATABASE")
-var outfile = os.Getenv("OUTFILE")
-
-type PostgresDumper struct{}
+type PostgresDumper struct {
+	Container string
+	User      string
+	Database  string
+	Outfile   string
+}
 
 func (pd *PostgresDumper) DumpDocker() error {
 	dockerExe, err := exec.LookPath("docker")
@@ -25,10 +25,10 @@ func (pd *PostgresDumper) DumpDocker() error {
 	cmd := exec.Command(
 		"sh", "-c",
 		strings.Join([]string{
-			dockerExe, "exec", "--user", user, container,
+			dockerExe, "exec", "--user", pd.User, pd.Container,
 			"bash", "-lc",
-			fmt.Sprintf("\"pg_dump --format custom %s\"", database),
-			">", outfile,
+			fmt.Sprintf("\"pg_dump --format custom %s\"", pd.Database),
+			">", pd.Outfile,
 		}, " "),
 	)
 
