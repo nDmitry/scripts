@@ -19,7 +19,7 @@ Runs pg_dump inside a specified Docker container and uploads the backup file to 
 Build the script with `make build-pgdumpdoc` or a custom build command, the artifact will be located in the `./bin` directory. A cron job for it might look like:
 
 ```
-0 3 * * * cd /where/you/uploaded/it && ./pgdumpdoc -container=my_postgres -u=postgres -db=my_db -o=/home/user/backups/my_db.pgdata -s3-endpoint=<S3 URL> -s3-key-id=<S3 key ID> -s3-key-secret=<S3 key secret> -s3-bucket=my-backups -s3-object=<my_db.pgdata> -telegram-token=<bot token> -telegram-chat-id=<...> 2>&1 | /usr/bin/logger -t pgdumpdoc
+0 3 * * * cd /where/you/uploaded/it && ./pgdumpdoc -container=my_postgres -u=postgres -db=my_db -o=/home/user/backups/my_db.pgdata -s3-endpoints=<S3 URL> -s3-key-ids=<S3 key ID> -s3-key-secrets=<S3 key secret> -s3-buckets=my-backups -s3-object=<my_db.pgdata> -telegram-token=<bot token> -telegram-chat-id=<...> 2>&1 | /usr/bin/logger -t pgdumpdoc
 ```
 
 To restore from a backup download it from the object storage and run:
@@ -35,5 +35,5 @@ Creates a `tar.gz` archive with an arbitrary directory and uploads it to any S3 
 Build the script with `make build-dirbackup` or a custom build command, the artifact will be located in the `./bin` directory. A cron job for it might look like:
 
 ```
-0 4 * * * cd /where/you/uploaded/it && ./dirbackup -dir=/path/to/backup -o=/home/user/backups/backup.tar.gz -s3-endpoint=<S3 URL> -s3-key-id=<S3 key ID> -s3-key-secret=<S3 key secret> -s3-bucket=my-backups -s3-object=<my_db.pgdata> -telegram-token=<bot token> -telegram-chat-id=<...> 2>&1 | /usr/bin/logger -t dirbackup
+0 4 * * * cd /where/you/uploaded/it && ./dirbackup -dir=/path/to/backup -o=/home/user/backups/backup.tar.gz -s3-endpoints=<S3 URL> -s3-key-ids=<S3 key ID> -s3-key-secrets=<S3 key secret> -s3-buckets=my-backups -s3-object=<my_db.pgdata> -telegram-token=<bot token> -telegram-chat-id=<...> 2>&1 | /usr/bin/logger -t dirbackup
 ```

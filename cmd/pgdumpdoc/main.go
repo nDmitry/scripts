@@ -13,10 +13,10 @@ var container = flag.String("container", "", "Docker container name running Post
 var user = flag.String("u", "", "User to run pg_dump under")
 var database = flag.String("db", "", "Database name")
 var outfile = flag.String("o", "", "Backup file output path, will be deleted in a successful scenario")
-var endpoint = flag.String("s3-endpoint", "", "S3 API endpoint URL")
-var accessKeyID = flag.String("s3-key-id", "", "S3 access key ID")
-var accessKeySecret = flag.String("s3-key-secret", "", "S3 access key secret")
-var bucket = flag.String("s3-bucket", "", "S3 bucket name")
+var endpoints = flag.String("s3-endpoints", "", "S3 API endpoint URL (can be multiple, separate with a comma)")
+var accessKeyIDs = flag.String("s3-key-ids", "", "S3 access key ID (can be multiple, separate with a comma)")
+var accessKeySecrets = flag.String("s3-key-secrets", "", "S3 access key secret (can be multiple, separate with a comma)")
+var buckets = flag.String("s3-buckets", "", "S3 bucket name (can be multiple, separate with a comma)")
 var object = flag.String("s3-object", "", "S3 object key (path to uploaded file)")
 var telegramToken = flag.String("telegram-token", "", "Telegram Bot API token")
 var telegramChatID = flag.Int("telegram-chat-id", 0, "ID of a Telegram group to send messages in")
@@ -45,9 +45,9 @@ func main() {
 		Token:  *telegramToken,
 		ChatID: *telegramChatID,
 	}, &integrations.S3{
-		Endpoint:        *endpoint,
-		AccessKeyID:     *accessKeyID,
-		AccessKeySecret: *accessKeySecret,
+		Endpoints:        *endpoints,
+		AccessKeyIDs:     *accessKeyIDs,
+		AccessKeySecrets: *accessKeySecrets,
 	})
 }
 
@@ -64,7 +64,7 @@ func Run(d dumper, n notifier, u uploader) {
 		log.Fatalf("Could not backup the database: %v\n", err)
 	}
 
-	if err = u.Upload(*outfile, *bucket, *object); err != nil {
+	if err = u.Upload(*outfile, *buckets, *object); err != nil {
 		if telegramErr := n.Notify(
 			fmt.Sprintf("Could not upload the database backup: %v\n", err),
 		); telegramErr != nil {
