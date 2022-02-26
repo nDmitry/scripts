@@ -20,6 +20,7 @@ const Threshold = 10
 
 var telegramToken = flag.String("telegram-token", "", "Telegram Bot API token")
 var telegramChatID = flag.Int("telegram-chat-id", 0, "ID of a Telegram group to send messages in")
+var sendOK = flag.Bool("send-ok", true, "Whether an OK result should be sent")
 
 type notifier interface {
 	Notify(text string) error
@@ -50,18 +51,26 @@ func Run(n notifier) {
 	all := stat.All / float64(GB)
 	avail := stat.Avail / float64(GB)
 	left := avail / all * 100
-
-	if left > Threshold {
-		log.Printf("Disk space is OK: %.1f%%\n", left)
-		return
-	}
+	ok := left > Threshold
 
 	text := fmt.Sprintf(
-		"Disk space is running low: %.1f%% available, which is %.1f GB out of %.1f GB",
+		"%.1f%% available, which is %.1f GB out of %.1f GB",
 		left,
 		avail,
 		all,
 	)
+
+	if ok {
+		text = "Disk space is OK: " + text
+	} else {
+		text = "Disk space is running low: " + text
+	}
+
+	log.Println(text)
+
+	if ok && !*sendOK {
+		return
+	}
 
 	if err = n.Notify(text); err != nil {
 		log.Fatalf("Could not send the message: %v", err)
