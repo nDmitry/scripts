@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 )
 
@@ -40,6 +41,12 @@ func (tn *TelegramNotifier) Notify(text string) error {
 	}
 
 	defer resp.Body.Close()
+
+	log.Println("Telegram response status code:", resp.StatusCode)
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("could not send Telegram message, status: %d", resp.StatusCode)
+	}
 
 	return nil
 }

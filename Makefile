@@ -11,3 +11,6 @@ build-mysqldump:
 
 build-dirbackup:
 	GOOS=linux GOARCH=amd64 go build -o ./bin/dirbackup cmd/dirbackup/main.go
+
+build-ping:
+	GOOS=linux GOARCH=amd64 go build -o ./bin/ping cmd/ping/main.go

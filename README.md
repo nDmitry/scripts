@@ -53,3 +53,13 @@ Build the script with `make build-dirbackup` or a custom build command, the arti
 ```
 0 4 * * * cd /where/you/uploaded/it && ./dirbackup -dir=/path/to/backup -o=/home/user/backups/backup.tar.gz -s3-endpoints=<S3 URL> -s3-key-ids=<S3 key ID> -s3-key-secrets=<S3 key secret> -s3-buckets=my-backups -s3-object=<my_db.pgdata> -telegram-token=<bot token> -telegram-chat-id=<...> 2>&1 | /usr/bin/logger -t dirbackup
 ```
+
+## ping
+
+Checks if a network target is online. Encountered offline states will be sent to a Telegram chat.
+
+Build the script with `make build-ping` or a custom build command, the artifact will be located in the `./bin` directory. A cron job for it might look like:
+
+```
+0 4 * * * cd /where/you/uploaded/it && ./ping -host=localhost -port=587 -telegram-token=<bot token> -telegram-chat-id=<...> 2>&1 | /usr/bin/logger -t ping
+```
