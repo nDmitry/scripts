@@ -28,6 +28,22 @@ To restore from a backup download it from the object storage and run:
 docker exec -i my_pg pg_restore --dbname=my_db --verbose --clean < /tmp/pg_dump.pgdata
 ```
 
+## mysqldump
+
+Backs up specified MySQL database and uploads the backup file to any S3 compatible object storage. The file will then be deleted from the host filesystem (or left untouched in case of an error). Encountered errors will be sent to a Telegram chat.
+
+Build the script with `make build-mysqldump` or a custom build command, the artifact will be located in the `./bin` directory. A cron job for it might look like:
+
+```
+0 3 * * * cd /where/you/uploaded/it && ./mysqldump -u=user -p=password -db=my_db -o=/home/user/backups/my_db.sql.gz -s3-endpoints=<S3 URL> -s3-key-ids=<S3 key ID> -s3-key-secrets=<S3 key secret> -s3-buckets=my-backups -s3-object=<my_db.sql.gz> -telegram-token=<bot token> -telegram-chat-id=<...> 2>&1 | /usr/bin/logger -t mysqldump
+```
+
+To restore from a backup download it from the object storage and run:
+
+```bash
+mysql -u [user] -p [my_db] < /tmp/my_db.sql.gz
+```
+
 ## dirbackup
 
 Creates a `tar.gz` archive with an arbitrary directory and uploads it to any S3 compatible object storage. The archive will then be deleted from the host filesystem (or left untouched in case of an error). Encountered errors will be sent to a Telegram chat.
