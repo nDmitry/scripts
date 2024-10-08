@@ -9,6 +9,7 @@ import (
 	"github.com/nDmitry/scripts/pkg/integrations"
 )
 
+var container = flag.String("container", "", "Docker container name running MySQL database")
 var user = flag.String("u", "", "MySQL user")
 var password = flag.String("p", "", "MySQL password")
 var database = flag.String("db", "", "Database name")
@@ -37,10 +38,11 @@ func main() {
 	flag.Parse()
 
 	Run(&integrations.MysqlDumper{
-		User:     *user,
-		Password: *password,
-		Database: *database,
-		Outfile:  *outfile,
+		Container: *container,
+		User:      *user,
+		Password:  *password,
+		Database:  *database,
+		Outfile:   *outfile,
 	}, &integrations.TelegramNotifier{
 		Token:  *telegramToken,
 		ChatID: *telegramChatID,

@@ -9,24 +9,30 @@ import (
 )
 
 type MysqlDumper struct {
-	User     string
-	Password string
-	Database string
-	Outfile  string
+	Container string
+	User      string
+	Password  string
+	Database  string
+	Outfile   string
 }
 
 func (md *MysqlDumper) Dump() error {
-	mysqldumpExe, err := exec.LookPath("mysqldump")
+	dockerExe, err := exec.LookPath("docker")
 
 	if err != nil {
-		return fmt.Errorf("could not lookup the mysqldump location: %w", err)
+		return fmt.Errorf("could not lookup the docker location: %w", err)
 	}
 
 	cmd := exec.Command(
 		"sh", "-c",
 		strings.Join([]string{
-			mysqldumpExe, "-u", md.User, "-p" + md.Password,
-			md.Database, "|", "gzip", ">", md.Outfile,
+			dockerExe, "exec", md.Container,
+			"bash", "-lc",
+			fmt.Sprintf(
+				"\"mysqldump -u %s -p %s %s\"",
+				md.User, md.Password, md.Database,
+			),
+			"|", "gzip", ">", md.Outfile,
 		}, " "),
 	)
 
