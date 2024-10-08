@@ -29,7 +29,7 @@ func (md *MysqlDumper) Dump() error {
 			dockerExe, "exec", md.Container,
 			"bash", "-lc",
 			fmt.Sprintf(
-				"\"mysqldump -u %s -p %s %s\"",
+				"\"mysqldump -u %s -p%s %s\"",
 				md.User, md.Password, md.Database,
 			),
 			"|", "gzip", ">", md.Outfile,
