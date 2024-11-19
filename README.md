@@ -12,6 +12,16 @@ Build the script with `make build-freespace` or a custom build command, the arti
 0 * * * * cd /where/you/uploaded/it && ./freespace -telegram-token=<bot token> -telegram-chat-id=<...> 2>&1 | /usr/bin/logger -t freespace
 ```
 
+## tempmon
+
+Checks current CPU temperature and sends a notification to a Telegram chat if it's more than a specified threshold (60°C by default). Encountered errors will be sent to a Telegram chat as well.
+
+Build the script with `make build-tempmon` or a custom build command, the artifact will be located in the `./bin` directory. Upload it to a server and run periodically using cron, e.g.:
+
+```cron
+0 * * * * cd /where/you/uploaded/it && ./tempmon -telegram-token=<bot token> -telegram-chat-id=<...> -threshold=60 2>&1 | /usr/bin/logger -t tempmon
+```
+
 ## pgdumpdoc
 
 Runs pg_dump inside a specified Docker container and uploads the backup file to any S3 compatible object storage. The file will then be deleted from the host filesystem (or left untouched in case of an error). Encountered errors will be sent to a Telegram chat.

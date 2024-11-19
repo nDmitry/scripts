@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 )
 
 type TelegramNotifier struct {
@@ -14,13 +15,19 @@ type TelegramNotifier struct {
 }
 
 func (tn *TelegramNotifier) Notify(text string) error {
+	hostname, err := os.Hostname()
+
+	if err != nil {
+		return fmt.Errorf("could not get the hostname: %w", err)
+	}
+
 	body := struct {
 		ChatID                int    `json:"chat_id"`
 		Text                  string `json:"text"`
 		DisableWebPagePreview bool   `json:"disable_web_page_preview"`
 	}{
 		ChatID:                tn.ChatID,
-		Text:                  text,
+		Text:                  fmt.Sprintf("[%s]\n\n%s", hostname, text),
 		DisableWebPagePreview: true,
 	}
 

@@ -3,6 +3,11 @@
 build-freespace:
 	GOOS=linux GOARCH=amd64 go build -o ./bin/freespace cmd/freespace/main.go
 
+build-tempmon:
+	GOOS=linux GOARCH=amd64 go build -o ./bin/tempmon cmd/tempmon/main.go
+build-tempmon-arm:
+	GOOS=linux GOARCH=arm go build -o ./bin/tempmon cmd/tempmon/main.go
+
 build-pgdumpdoc:
 	GOOS=linux GOARCH=amd64 go build -o ./bin/pgdumpdoc cmd/pgdumpdoc/main.go
 
