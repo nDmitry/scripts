@@ -12,7 +12,17 @@ func GetAverageCPUTemp() (float64, error) {
 	stats, err := sensors.SensorsTemperatures()
 
 	if err != nil {
-		return 0, fmt.Errorf("failed to read sensor temperatures: %w", err)
+		warns, ok := err.(*sensors.Warnings)
+
+		if ok {
+			warns.Verbose = true
+		}
+
+		if strings.Contains(err.Error(), "no data available") {
+			// missings sensors data should not generate an error
+		} else {
+			return 0, fmt.Errorf("failed to read sensor temperatures: %w", err)
+		}
 	}
 
 	var coreTemps []float64
